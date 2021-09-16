@@ -22,7 +22,7 @@ app.get('/api/persons', (req, res) => {
   Person.find({}).then(persons => res.json(persons))
 })
 
-app.get('/api/persons/:id', (req, res) => {
+app.get('/api/persons/:id', (req, res, next) => {
   Person.findById(req.params.id)
     .then(person => {
       if(person) {
@@ -32,6 +32,7 @@ app.get('/api/persons/:id', (req, res) => {
         res.status(404).end()
       }
     })
+    .catch(error => next(error))
 })
 
 app.post('/api/persons', (req, res) => {
@@ -54,9 +55,10 @@ app.post('/api/persons', (req, res) => {
   })
 })
 
-app.delete('/api/persons/:id', (req, res) => {
+app.delete('/api/persons/:id', (req, res, next) => {
   Person.findByIdAndRemove(req.params.id)
     .then(result => res.status(204).end())
+    .catch(error => next(error))
 })
 
 app.get('/info', (req, res) => {
@@ -64,6 +66,24 @@ app.get('/info', (req, res) => {
     `<p>Phonebook has info for ${persons.length} people</p><p>${Date()}</p>`
     )
 })
+
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
+
+app.use(unknownEndpoint)
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  }
+
+  next(error)
+}
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
