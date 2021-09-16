@@ -75,9 +75,11 @@ app.delete('/api/persons/:id', (req, res, next) => {
 })
 
 app.get('/info', (req, res) => {
-  res.end(
-    `<p>Phonebook has info for ${persons.length} people</p><p>${Date()}</p>`
-    )
+  Person.find({}).then(persons => {
+    res.end(
+      `<p>Phonebook has info for ${persons.length} people</p><p>${Date()}</p>`
+      )
+  })
 })
 
 const unknownEndpoint = (request, response) => {
