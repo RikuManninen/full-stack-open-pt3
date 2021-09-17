@@ -5,7 +5,7 @@ const cors = require('cors')
 const app = express()
 const Person = require('./models/person')
 
-morgan.token('body', function (req, res) {
+morgan.token('body', function (req) {
   if(req.method === 'POST')
     return JSON.stringify(req.body)
 })
@@ -57,7 +57,7 @@ app.post('/api/persons', (req, res, next) => {
       error: 'name or number is missing'
     })
   }
-  
+
   const person = new Person({
     name: body.name,
     number: body.number
@@ -72,7 +72,7 @@ app.post('/api/persons', (req, res, next) => {
 
 app.delete('/api/persons/:id', (req, res, next) => {
   Person.findByIdAndRemove(req.params.id)
-    .then(result => res.status(204).end())
+    .then(() => res.status(204).end())
     .catch(error => next(error))
 })
 
@@ -80,7 +80,7 @@ app.get('/info', (req, res) => {
   Person.find({}).then(persons => {
     res.end(
       `<p>Phonebook has info for ${persons.length} people</p><p>${Date()}</p>`
-      )
+    )
   })
 })
 
